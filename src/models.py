@@ -12,6 +12,7 @@ class Message (BaseModel):
 
 class ClassificationResponse (BaseModel):
 
+    id : int | None = None
     intent : Literal[
         "create_appointment",
         "cancel_appointment",
