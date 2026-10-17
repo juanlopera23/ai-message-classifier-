@@ -1,33 +1,31 @@
-from pydantic import BaseModel, ValidationError,StringConstraints, field_validator
+from pydantic import BaseModel, ValidationError, StringConstraints, field_validator
 from typing import Annotated, Literal
 from datetime import date, datetime
 
 
-class Message (BaseModel):
+class Message(BaseModel):
 
-    ask : Annotated[
-        str,
-        StringConstraints(strip_whitespace=True, min_length=1)
-    ]
+    ask: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
 
-class ClassificationResponse (BaseModel):
 
-    id : int | None = None
-    intent : Literal[
+class ClassificationResponse(BaseModel):
+
+    id: int | None = None
+    intent: Literal[
         "create_appointment",
         "cancel_appointment",
         "check_availability",
         "reschedule_appointment",
-        "unknown"
+        "unknown",
     ]
     date: str | None = None
-    time : str | None = None
+    time: str | None = None
 
     @field_validator("date", mode="after")
     @classmethod
     def validate_date(cls, value):
 
-        if value is None :
+        if value is None:
             return value
 
         today = date.today()
@@ -36,21 +34,21 @@ class ClassificationResponse (BaseModel):
         if convert_date.isoformat() != value:
             raise ValueError("Invalid date format. Expected YYYY-MM-DD")
 
-        if convert_date < today :
+        if convert_date < today:
             raise ValueError("Invalid date")
 
         return value
 
     @field_validator("time", mode="after")
     @classmethod
-    def validate_time (cls, value):
+    def validate_time(cls, value):
 
         if value is None:
             return value
 
         if len(value) != 5 or value[2] != ":":
 
-            raise ValueError ("Invalid time format. Expected HH:MM")
+            raise ValueError("Invalid time format. Expected HH:MM")
 
         try:
 
@@ -58,4 +56,4 @@ class ClassificationResponse (BaseModel):
 
             return value
         except ValueError:
-            raise ValueError ("Invalid time format. Expected HH:MM")
+            raise ValueError("Invalid time format. Expected HH:MM")

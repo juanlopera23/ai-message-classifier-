@@ -9,43 +9,34 @@ router = APIRouter()
 
 next_id = 0
 
-list_request= []
+list_request = []
 
-@router.post("/ask", response_model= ClassificationResponse)
-async def clasifier_message (message : Message):
+
+@router.post("/ask", response_model=ClassificationResponse)
+async def clasifier_message(message: Message):
 
     global next_id
 
     try:
 
-        interaction =await interaction_genia(message.ask)
+        interaction = await interaction_genia(message.ask)
 
     except ServerError as e:
 
         print(e)
-        raise HTTPException(
-            status_code= 503,
-            detail="Gemini Service Unavailable"
-        )
+        raise HTTPException(status_code=503, detail="Gemini Service Unavailable")
 
     except ClientError as e:
 
-        raise HTTPException(
-        status_code=503,
-        detail="AI service request failed"
-    )
+        raise HTTPException(status_code=503, detail="AI service request failed")
 
     try:
         ask = ClassificationResponse.model_validate_json(interaction.output_text)
         ask.id = next_id
         list_request.append(ask)
-        next_id +=1
+        next_id += 1
     except ValidationError:
 
-        raise HTTPException(
-            status_code= 502,
-            detail="validation error"
-        )
-
+        raise HTTPException(status_code=502, detail="validation error")
 
     return ask
